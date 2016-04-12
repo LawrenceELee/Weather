@@ -7,4 +7,8 @@ Learned:
 * Parsing JSON (JSONObject, JSONArray) - HTTP response will be in JSON (Javascript Object Notation), we have to parse this data to get the information we want.
 * ListViews - used to display the JSON data in a "human readable" list form.
 * ArrayAdapters - adapters are a pattern used to transform from array to ListViwe.
-* ViewHolder Pattern
+* ViewHolder Pattern - reuse views that scroll off the screen in a ListView, rather than creating new views.
+* View widgets: 
+    + TextInputLayout - similar to the "hint" property of an EditText.
+    + SnackBar - like a Toast notification but can be interacted with (e.g. swipe, etc).
+    + FloatingActionButton - instead of a seperate "okay" or "enter" button.
