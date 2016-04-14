@@ -7,12 +7,13 @@ import java.util.TimeZone;
 
 // This is the data/model layer for the app.
 public class Weather {
-    final String dayOfWeek;
-    final String minTemp;
-    final String maxTemp;
-    final String humidity;
-    final String description;
-    final String iconURL;
+    // final keyword means value doesn't change once value is initialize (set)
+    private final String dayOfWeek;
+    private final String minTemp;
+    private final String maxTemp;
+    private final String humidity;
+    private final String description;
+    private final String iconURL;
 
     public Weather(long timeStamp, double minTemp, double maxTemp,
                    double humidity, String description, String iconName) {
@@ -50,4 +51,28 @@ public class Weather {
         return dateFormatter.format(calendar.getTime());
     }
 
+    // getters for members (values are set using constructor)
+    public String getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public String getMinTemp() {
+        return minTemp;
+    }
+
+    public String getMaxTemp() {
+        return maxTemp;
+    }
+
+    public String getHumidity() {
+        return humidity;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getIconURL() {
+        return iconURL;
+    }
 }

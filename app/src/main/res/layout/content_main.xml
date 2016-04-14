@@ -14,6 +14,8 @@
     tools:showIn="@layout/activity_main"
     android:orientation="vertical" >
 
+    <!-- There is a bug with TextInputLayouts with SDK 23 -->
+    <!--
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,6 +30,13 @@
             android:singleLine="true"/>
 
     </android.support.design.widget.TextInputLayout>
+    -->
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_text"
+        android:id="@+id/locationEditText"
+        android:singleLine="true"/>
 
     <ListView
         android:layout_width="match_parent"
