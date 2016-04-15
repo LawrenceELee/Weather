@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     // create url to API
     private URL createURL(String city) {
         // hard code for testing so you don't have to type input everytime
-        city = "newyork";
+        city = "new%20york"; // %20 is url encoded space char
 
         String baseUrl = APISettings.apiBase;
         String units = APISettings.apiUnits;
@@ -92,7 +92,8 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             // create URL for specified city and imperial units (Fahrenheit)
-            String urlString = baseUrl + URLEncoder.encode(city, "UTF-8") + units + apiKey;
+            //String urlString = baseUrl + URLEncoder.encode(city, "UTF-8") + units + apiKey;
+            String urlString = baseUrl + city + units + apiKey;
 
             Log.d(TAG, "city is: " + city);
 
@@ -142,7 +143,9 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
+                    Log.d(TAG, "JSON data: " + builder.toString());
                     return new JSONObject(builder.toString());
+
                 } else {
                     // problem with HTTP transaction
                     Snackbar.make(
