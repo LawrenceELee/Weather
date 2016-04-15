@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
 
         // configure FAB to hide keyboard and initiate web service request
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -84,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     // create url to API
     private URL createURL(String city) {
         // hard code for testing so you don't have to type input everytime
-        city = "new%20york"; // %20 is url encoded space char
+        //city = "new%20york"; // %20 is url encoded space char
 
         String baseUrl = APISettings.apiBase;
         String units = APISettings.apiUnits;
@@ -92,10 +91,12 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             // create URL for specified city and imperial units (Fahrenheit)
-            //String urlString = baseUrl + URLEncoder.encode(city, "UTF-8") + units + apiKey;
-            String urlString = baseUrl + city + units + apiKey;
+            String urlString = baseUrl + URLEncoder.encode(city, "UTF-8") + units + apiKey;
+            //String urlString = baseUrl + city + units + apiKey;
 
             Log.d(TAG, "city is: " + city);
+            // test if Snackbar works for Android 4.4 (it does).
+            //Snackbar.make(findViewById(R.id.coordinatorLayout), "city is: " + city, Snackbar.LENGTH_LONG).show();
 
             // urlString should resemble "http://api.openweathermap.org/data/2.5/forecast/daily?q=newyork&units=imperial&cnt=16&APPID=XXXXX"
             // where XXXXX is your specific api key.
