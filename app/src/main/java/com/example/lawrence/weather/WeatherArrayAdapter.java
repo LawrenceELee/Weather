@@ -21,19 +21,33 @@ import java.util.Map;
 
 // This is also in the controller layer.
 // We use an ArrayAdapter to bind data/model from Weather.java to ListView in MainActivity.java
+// An optimization to the ArrayAdapter is to use a ViewHolder pattern. This has faster
+// performance because we "save"/reduce the amount of findViewById() calls which are VERY expensive.
+// The ViewHolder class contains references to the views, if this is being created for the
+// first time, we inflate() and findViewById() (both expensive operations), otherwise we
+// can save processing by reusing the same ViewHolder object and just reset the data.
 public class WeatherArrayAdapter extends ArrayAdapter<Weather> {
 
-    // cache previous downloaded weather icons
+    // cache previous downloaded weather icons, so that we don't waste time/bandwidth
+    // downloading them again. cache persists until app is terminated.
     private Map<String, Bitmap> iconCache = new HashMap<>();
 
     // constructor, call superclass
     public WeatherArrayAdapter(Context context, List<Weather> forecast) {
+        // forecast is passed from MainActivity to be populated here.
         super(context, -1, forecast);
+        // -1 for 2nd arg indicates that we are using a custom layout.
+        // so that we can display more than 1 TextView.
+        // (by default a ListView displays 1 or 2 TextViews.
     }
 
     // have to override getView to create custom views for ListView's list_items
+    // getView() maps data to a custom ListView item.
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        // position identifies the ListView's position in the array of ListViews
+        // convertView is the ListView itself
+        // parent is the layout's parent ViewGroup that we will attach the ListView item in the inflater
 
         Weather weather = getItem(position);
 
@@ -59,10 +73,13 @@ public class WeatherArrayAdapter extends ArrayAdapter<Weather> {
                     (TextView) convertView.findViewById(R.id.hiTextView);
             viewHolder.humidityTextView =
                     (TextView) convertView.findViewById(R.id.humidityTextView);
+
+            // set tag so that ViewHolder can be reused if needed
             convertView.setTag(viewHolder);
 
         } else {
-            // reuse existing ViewHolder stored as the list_item's tag
+            // reuse existing ViewHolder that scrolled off the screen.
+            // we get the ref by using getTag()
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
@@ -97,6 +114,7 @@ public class WeatherArrayAdapter extends ArrayAdapter<Weather> {
     }
 
     // AsyncTask to load weather icon in separate thread
+    // AysncTask abstract the details of the creating/executing threads from you.
     private class LoadImageTask extends AsyncTask<String, Void, Bitmap>{
         private ImageView imageView; // displays thumbnail
 
@@ -139,6 +157,8 @@ public class WeatherArrayAdapter extends ArrayAdapter<Weather> {
     } // end LoadImageTask inner class
 
     // use ViewHolder pattern to reuse views as list_items scroll off screen
+    // when a ListView is created, a ViewHolder object is associated with that item.
+    // if there is a ListView item that's being reused, we simply obtain that item's ViewHolder.
     private static class ViewHolder {
         ImageView conditionImageView;
         TextView dayTextView;

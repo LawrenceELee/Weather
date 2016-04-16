@@ -32,16 +32,22 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    // stores Weather objects, 1 object for each "day" in the JSON data.
     private List<Weather> weatherList = new ArrayList<>();
 
     // ArrayAdapter for binding Weather objects to a ListView
     private WeatherArrayAdapter weatherArrayAdapter;
+
+    // ListView container widget
     private ListView weatherListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // AppCompatActivity must programmatically supply it's own tool/action bars
+        // to be compatible for earlier versions of Android.
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -64,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
                 if (url != null) {
                     dismissKeyboard(locationEditText);
                     GetWeatherTask getLocalWeatherTask = new GetWeatherTask();
+                    // note: AsyncTasks instances can only be execute() once.
+                    // we have to create new instances for every execute().
                     getLocalWeatherTask.execute(url);
                 }
                 else {
@@ -80,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // create url to API
+    // create url to API (endpoint to send GET request).
     private URL createURL(String city) {
         // hard code for testing so you don't have to type input everytime
         //city = "new%20york"; // %20 is url encoded space char
@@ -111,9 +119,14 @@ public class MainActivity extends AppCompatActivity {
 
     // makes the REST web service call to get weather data and save data to a local HTML file
     private class GetWeatherTask extends AsyncTask<URL, Void, JSONObject> {
+        // takes a generics of url, void, and JSONObject
+        // url is used by doInBackground()
+        // void is used by onProgressUpdate(), which we aren't using
+        // jsonobject is used by onPostExecute()
 
         @Override
         protected JSONObject doInBackground(URL... params) {
+            // we use variable num of params, but we only used the 1st param (params[0])
             HttpURLConnection connection = null;
 
             // try doing a HTTP connection
@@ -171,21 +184,27 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
+        // this will be called by the main UI thread when needed.
         // process JSON response and update ListView
         @Override
         protected void onPostExecute(JSONObject weather) {
-            convertJSONtoArrayList(weather); // repopulate weatherList
-            weatherArrayAdapter.notifyDataSetChanged(); // rebind to ListView
-            weatherListView.smoothScrollToPosition(0); // scroll to top
+            // repopulate weatherList with updated data
+            convertJSONtoArrayList(weather);
+
+            // notify adapter that we updated weather object and rebind to ListView
+            weatherArrayAdapter.notifyDataSetChanged();
+
+            // scroll back to the top of the list
+            weatherListView.smoothScrollToPosition(0);
         }
     }
 
-    // transform and bind JSON data to Weather objects
+    // method to transform/"mung" and bind JSON data to Weather objects
     private void convertJSONtoArrayList(JSONObject forecast) {
         weatherList.clear(); // clear old weather data
 
         try {
-            // get forecast's "list" JSONArray
+            // get forecast's "list" JSONArray which contains 16 days of weather.
             JSONArray list = forecast.getJSONArray("list");
 
             // convert each element of list to a Weather object
