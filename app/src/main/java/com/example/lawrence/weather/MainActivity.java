@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,8 +24,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 // This is the controller layer for the app.
 // It has most of the logic for downloading JSON data from API.
@@ -33,13 +37,16 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     // stores Weather objects, 1 object for each "day" in the JSON data.
-    private List<Weather> weatherList = new ArrayList<>();
+    private List<Weather> mWeatherList = new ArrayList<>();
 
     // ArrayAdapter for binding Weather objects to a ListView
-    private WeatherArrayAdapter weatherArrayAdapter;
+    private WeatherArrayAdapter mWeatherArrayAdapter;
 
     // ListView container widget
-    private ListView weatherListView;
+    private ListView mWeatherListView;
+    private EditText mLocationEditText;
+    private TextView mLocationTextView;
+    private TextView mTimeUpdatedTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,24 +58,29 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // create ArrayAdapter to bind weatherList to the weatherListView
-        weatherListView = (ListView) findViewById(R.id.weatherListView);
-        weatherArrayAdapter = new WeatherArrayAdapter(this, weatherList);
-        weatherListView.setAdapter(weatherArrayAdapter);
+        mLocationTextView = (TextView) findViewById(R.id.locationTextView);
+        mLocationTextView.setVisibility(View.INVISIBLE);
+        mTimeUpdatedTextView = (TextView) findViewById(R.id.timeUpdatedTextView);
+        mTimeUpdatedTextView.setVisibility(View.INVISIBLE);
+
+        // create ArrayAdapter to bind mWeatherList to the mWeatherListView
+        mWeatherListView = (ListView) findViewById(R.id.weatherListView);
+        mWeatherArrayAdapter = new WeatherArrayAdapter(this, mWeatherList);
+        mWeatherListView.setAdapter(mWeatherArrayAdapter);
 
         // configure FAB to hide keyboard and initiate web service request
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // get text from locationEditText and create web service URL
-                EditText locationEditText = (EditText) findViewById(R.id.locationEditText);
-                URL url = createURL(locationEditText.getText().toString());
+                // get text from mLocationEditText and create web service URL
+                mLocationEditText = (EditText) findViewById(R.id.locationEditText);
+                URL url = createURL(mLocationEditText.getText().toString());
 
                 // hide keyboard and initiate a GetWeatherTask to download
                 // weather data from OpenWeatherMap.org in a separate thread
                 if (url != null) {
-                    dismissKeyboard(locationEditText);
+                    dismissKeyboard(mLocationEditText);
                     GetWeatherTask getLocalWeatherTask = new GetWeatherTask();
                     // note: AsyncTasks instances can only be execute() once.
                     // we have to create new instances for every execute().
@@ -77,8 +89,28 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     Snackbar.make(findViewById(R.id.coordinatorLayout), R.string.invalid_url, Snackbar.LENGTH_LONG).show();
                 }
+
+                updateLocation();
+                updatedTime();
             }
         });
+    }
+
+    // helper method to set location text
+    private void updateLocation(){
+        mLocationTextView.setText(this.getString(R.string.location, "--"));
+        mLocationTextView.setVisibility(View.VISIBLE);
+    }
+
+    // get and set text to time that data was updated.
+    private void updatedTime() {
+        SimpleDateFormat formatter = new SimpleDateFormat("h:mm:ss zzz");
+        formatter.setTimeZone(TimeZone.getDefault());
+        Date date = new Date(System.currentTimeMillis());
+        String timeString = formatter.format(date);
+
+        mTimeUpdatedTextView.setText(this.getString(R.string.time_updated, timeString));
+        mTimeUpdatedTextView.setVisibility(View.VISIBLE);
     }
 
     // programmatically hide keyboard after user touches floating button
@@ -188,20 +220,20 @@ public class MainActivity extends AppCompatActivity {
         // process JSON response and update ListView
         @Override
         protected void onPostExecute(JSONObject weather) {
-            // repopulate weatherList with updated data
+            // repopulate mWeatherList with updated data
             convertJSONtoArrayList(weather);
 
             // notify adapter that we updated weather object and rebind to ListView
-            weatherArrayAdapter.notifyDataSetChanged();
+            mWeatherArrayAdapter.notifyDataSetChanged();
 
             // scroll back to the top of the list
-            weatherListView.smoothScrollToPosition(0);
+            mWeatherListView.smoothScrollToPosition(0);
         }
     }
 
     // method to transform/"mung" and bind JSON data to Weather objects
     private void convertJSONtoArrayList(JSONObject forecast) {
-        weatherList.clear(); // clear old weather data
+        mWeatherList.clear(); // clear old weather data
 
         try {
             // get forecast's "list" JSONArray which contains 16 days of weather.
@@ -217,8 +249,8 @@ public class MainActivity extends AppCompatActivity {
                 // get data's "weather" JSONObject for the description and icon
                 JSONObject weather = data.getJSONArray("weather").getJSONObject(0);
 
-                // add new Weather object to weatherList
-                weatherList.add(
+                // add new Weather object to mWeatherList
+                mWeatherList.add(
                         new Weather(
                                 data.getLong("dt"), // date/time timestamp
                                 temperatures.getDouble("min"), // minimum temperature
